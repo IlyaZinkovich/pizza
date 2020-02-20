@@ -5,12 +5,13 @@ import static java.lang.Math.min;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.BitSet;
 import java.util.Scanner;
 
 public class Pizza {
 
   public static void main(String[] args) throws FileNotFoundException {
-    try (Scanner scanner = new Scanner(new File("c_medium.in"));
+    try (Scanner scanner = new Scanner(new File("d_quite_big.in"));
         PrintWriter writer = new PrintWriter(new File("output.txt"))) {
       int max = scanner.nextInt();
       int n = scanner.nextInt();
@@ -20,7 +21,7 @@ public class Pizza {
 
   private static void solve(int max, int n, Scanner scanner, PrintWriter writer) {
     int[] f = new int[max + 1];
-    String[] orderedPizzas = new String[max + 1];
+    BitSet[] orderedPizzas = new BitSet[max + 1];
     int sum = 0;
     for (int i = 1; i <= n; i++) {
       int newPizzaIndex = i - 1;
@@ -32,11 +33,15 @@ public class Pizza {
         int slicesWithoutNewPizza = f[j];
         if (slicesWithNewPizza > slicesWithoutNewPizza) {
           f[j] = slicesWithNewPizza;
-          String pizzas = orderedPizzas[slicesLeft];
+          BitSet pizzas = orderedPizzas[slicesLeft];
           if (pizzas == null || pizzas.isEmpty()) {
-            pizzas = Integer.toString(newPizzaIndex);
+            pizzas = new BitSet(n);
+            pizzas.set(newPizzaIndex);
           } else {
-            pizzas += " " + newPizzaIndex;
+            BitSet newPizzas = new BitSet(n);
+            newPizzas.or(pizzas);
+            newPizzas.set(newPizzaIndex);
+            pizzas = newPizzas;
           }
           orderedPizzas[j] = pizzas;
         } else {
