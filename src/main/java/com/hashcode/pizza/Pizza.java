@@ -1,20 +1,24 @@
 package com.hashcode.pizza;
 
+import static java.lang.Math.min;
+
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.Scanner;
 
 public class Pizza {
 
   public static void main(String[] args) throws FileNotFoundException {
-    try (Scanner scanner = new Scanner(new File("c_medium.in"))) {
+    try (Scanner scanner = new Scanner(new File("c_medium.in"));
+        PrintWriter writer = new PrintWriter(new File("output.txt"))) {
       int max = scanner.nextInt();
       int n = scanner.nextInt();
-      System.out.println(solveOpt(max, n, scanner));
+      solve(max, n, scanner, writer);
     }
   }
 
-  private static String solveOpt(int max, int n, Scanner scanner) {
+  private static void solve(int max, int n, Scanner scanner, PrintWriter writer) {
     int[] f = new int[max + 1];
     String[] orderedPizzas = new String[max + 1];
     int sum = 0;
@@ -22,36 +26,25 @@ public class Pizza {
       int newPizzaIndex = i - 1;
       int newPizzaSlices = scanner.nextInt();
       sum += newPizzaSlices;
-//      System.out.println(Instant.now() + " " + i);
-      for (int j = newPizzaSlices; j <= Math.min(sum, max); j++) {
-        if (j > sum) {
-          f[j] = f[j - 1];
-          continue;
-        }
+      for (int j = min(sum, max); j >= newPizzaSlices; j--) {
         int slicesLeft = j - newPizzaSlices;
-        if (newPizzaSlices <= j) {
-          if (orderedPizzas[slicesLeft] != null
-              && orderedPizzas[slicesLeft].endsWith(Integer.toString(newPizzaIndex))) {
-            continue;
-          }
-          int slicesWithNewPizza = f[slicesLeft] + newPizzaSlices;
-          int slicesWithoutNewPizza = f[j];
-          if (slicesWithNewPizza > slicesWithoutNewPizza) {
-            f[j] = slicesWithNewPizza;
-            String pizzas = orderedPizzas[slicesLeft];
-            if (pizzas == null || pizzas.isEmpty()) {
-              pizzas = Integer.toString(newPizzaIndex);
-            } else {
-              pizzas += " " + newPizzaIndex;
-            }
-            orderedPizzas[j] = pizzas;
+        int slicesWithNewPizza = f[slicesLeft] + newPizzaSlices;
+        int slicesWithoutNewPizza = f[j];
+        if (slicesWithNewPizza > slicesWithoutNewPizza) {
+          f[j] = slicesWithNewPizza;
+          String pizzas = orderedPizzas[slicesLeft];
+          if (pizzas == null || pizzas.isEmpty()) {
+            pizzas = Integer.toString(newPizzaIndex);
           } else {
-            f[j] = slicesWithoutNewPizza;
+            pizzas += " " + newPizzaIndex;
           }
+          orderedPizzas[j] = pizzas;
+        } else {
+          f[j] = slicesWithoutNewPizza;
         }
-//        System.out.println(Arrays.toString(f));
       }
     }
-    return orderedPizzas[max];
+    writer.println(f[max]);
+    writer.println(orderedPizzas[max]);
   }
 }
